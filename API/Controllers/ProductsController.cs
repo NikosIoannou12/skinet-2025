@@ -14,6 +14,7 @@ public class ProductsController : ControllerBase
     {
         this.productsDBContext = productsDBContext;
     }
+    //test
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
