@@ -11,6 +11,9 @@ builder.Services.AddDbContext<StoreContext>(opt =>
 {
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+//Dependency Injection of the Generic Repository (Type of IGenericRepository<>)
+//So every time we "ask" for IGenericRepository<T> it will return an instance of GenericRepository<T>
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>)); 
 //AddScoped - runs for the duration of the HTTP Request
 builder.Services.AddScoped<IProductRepository, ProductsRepository>();
 
