@@ -1,6 +1,7 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -36,9 +37,41 @@ public class ProductsRepository(StoreContext context) : IProductRepository
         return await context.Products.FindAsync(id);
     }
 
-    public async Task<IReadOnlyList<Product>> GetProductsAsync()
+    public async Task<IReadOnlyList<Product>> GetProductsAsync(string? brand, string? type, string? sort)
     {
-        return await context.Products.ToListAsync();
+        var query = context.Products.AsQueryable(); //All products
+
+        if (!string.IsNullOrWhiteSpace(brand))                 //If brand is given, search for those products with that brand
+        {
+            query = query.Where(x => x.Brand == brand);
+        }
+
+        if (!string.IsNullOrWhiteSpace(type))                  //If type is given, search for those products with that type
+        {
+            query = query.Where(x => x.Type == type);
+        }
+
+        if (!string.IsNullOrWhiteSpace(sort))
+        {
+            if (sort == "priceAsc")
+            {
+                // Sort by price ascending
+                query = query.OrderBy(x => x.Price);
+            } else if (sort == "priceDesc")
+            {
+                // Sort by price descending
+                query = query.OrderByDescending(x => x.Price);
+            }
+        }
+
+        query = sort switch
+        {
+            "priceAsc" => query.OrderBy(x => x.Price),
+            "priceDesc" => query.OrderByDescending(x => x.Price),
+            _ => query.OrderBy(x => x.Name) // Default sort by Name
+        };
+
+        return await query.ToListAsync();
     }
 
     public bool ProductExists(int id)
